@@ -27,11 +27,11 @@ textDump = {};
 usersBlankObject = {};
 for (const key of actors){
     textDump[key] = "";
-    usersBlankObject[key+"numberOfMessages"] = 0;
+    usersBlankObject[key+" numberOfMessages"] = 0;
 }
 textDump["total"] = "";
 for (const key of actors){
-    usersBlankObject[key+"numberOfCharacters"] = 0;
+    usersBlankObject[key+" numberOfCharacters"] = 0;
 }
 
 
@@ -87,11 +87,11 @@ for (i = gcLength-1; i >= 0; i--){
     if(groupChat[i].content != undefined){
         textDump[groupChat[i].sender_name] += groupChat[i].content.replace(/\W/g, '') + "  ";
         textDump["total"] += groupChat[i].content.replace(/\W/g, '') + "  ";
-        if(chatInfoObj[timestamp][groupChat[i].sender_name+"numberOfMessages"] === 0){
+        if(chatInfoObj[timestamp][groupChat[i].sender_name+" numberOfMessages"] === 0){
             chatInfoObj[timestamp]["numberOfPeopleTalking"]++;
         }
-        chatInfoObj[timestamp][groupChat[i].sender_name+"numberOfMessages"]++;
-        chatInfoObj[timestamp][groupChat[i].sender_name+"numberOfCharacters"]+=groupChat[i].content.replace(/\W/g, '').length;
+        chatInfoObj[timestamp][groupChat[i].sender_name+" numberOfMessages"]++;
+        chatInfoObj[timestamp][groupChat[i].sender_name+" numberOfCharacters"]+=groupChat[i].content.replace(/\W/g, '').length;
     }
 }
 
