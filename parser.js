@@ -27,12 +27,14 @@ textDump = {};
 usersBlankObject = {};
 for (const key of actors){
     textDump[key] = "";
-    usersBlankObject[key+" numberOfMessages"] = 0;
+    usersBlankObject[key+" Number Of Messages"] = 0;
 }
+usersBlankObject["Total Number Of Messages"] = 0;
 textDump["total"] = "";
 for (const key of actors){
-    usersBlankObject[key+" numberOfCharacters"] = 0;
+    usersBlankObject[key+" Number Of Characters"] = 0;
 }
+usersBlankObject["Total Number Of Characters"] = 0;
 
 
 //Set up hour long blocks 
@@ -43,7 +45,7 @@ indexOfChatInfoObj = {};
 while (timestamp <= roundToHour(new Date(groupChat[0].timestamp_ms))) {
     chatInfoObj[timestamp] = {...{'time':(timestamp.getMonth()+1)+"/"+timestamp.getDate()+"/"+timestamp.getFullYear(), 'hour':timestamp.getHours()+":00"}, 
                                 ...usersBlankObject,
-                                ...{"numberOfPeopleTalking":0, "peopleInChat":0, "numOfpeopleAdded": "", "numOfpeopleRemoved": "", "peopleAdded": "", "peopleRemoved": "" }};  
+                                ...{"People Talking":0, "People In Chat":0, "Additions": "", "Removals": "", "People Added": "", "People Removed": "" }};  
     indexOfChatInfoObj[timestamp] = counter;
     counter++; 
     timestamp.setHours(timestamp.getHours()+1);
@@ -51,7 +53,7 @@ while (timestamp <= roundToHour(new Date(groupChat[0].timestamp_ms))) {
 
 //Going backwards in time
 timestamp = roundToHour(new Date(groupChat[0].timestamp_ms));
-chatInfoObj[timestamp]['peopleInChat'] = currentUsers;
+chatInfoObj[timestamp]['People In Chat'] = currentUsers;
 for (i = 0; i < gcLength; i++){
     console.log(((i/ gcLength)*50).toFixed(2)+ "%")
 
@@ -59,22 +61,22 @@ for (i = 0; i < gcLength; i++){
     if(i != 0 && (timestamp != roundToHour(new Date(groupChat[i-1].timestamp_ms)))){
         for(j = 0; j < (roundToHour(new Date(groupChat[i-1].timestamp_ms))-roundToHour(new Date(groupChat[i].timestamp_ms)))/36e5; j++){
             timestamp = Object.keys(chatInfoObj)[indexOfChatInfoObj[roundToHour(new Date(groupChat[i].timestamp_ms)).toString()]+j]
-            chatInfoObj[timestamp]['peopleInChat'] = chatInfoObj[roundToHour(new Date(groupChat[i-1].timestamp_ms))]['peopleInChat'];
+            chatInfoObj[timestamp]['People In Chat'] = chatInfoObj[roundToHour(new Date(groupChat[i-1].timestamp_ms))]['People In Chat'];
         }
     }
     
     if(groupChat[i].type === "Subscribe"){
         for(user of groupChat[i].users){
-            chatInfoObj[timestamp]['peopleAdded'] += user["name"]+";";
-            chatInfoObj[timestamp]['numOfpeopleAdded']++;
-            chatInfoObj[timestamp]['peopleInChat']--;
+            chatInfoObj[timestamp]['People Added'] += user["name"]+";";
+            chatInfoObj[timestamp]['Additions']++;
+            chatInfoObj[timestamp]['People In Chat']--;
         }
     }
     else if(groupChat[i].type === "Unsubscribe"){
         for(user of groupChat[i].users){
-            chatInfoObj[timestamp]['peopleRemoved'] += user["name"]+";";
-            chatInfoObj[timestamp]['numOfpeopleRemoved']++;
-            chatInfoObj[timestamp]['peopleInChat']++;
+            chatInfoObj[timestamp]['People Removed'] += user["name"]+";";
+            chatInfoObj[timestamp]['Removals']++;
+            chatInfoObj[timestamp]['People In Chat']++;
         }
     }
 }
@@ -87,11 +89,13 @@ for (i = gcLength-1; i >= 0; i--){
     if(groupChat[i].content != undefined){
         textDump[groupChat[i].sender_name] += groupChat[i].content + "  ";
         textDump["total"] += groupChat[i].content + "  ";
-        if(chatInfoObj[timestamp][groupChat[i].sender_name+" numberOfMessages"] === 0){
-            chatInfoObj[timestamp]["numberOfPeopleTalking"]++;
+        if(chatInfoObj[timestamp][groupChat[i].sender_name+" Number Of Messages"] === 0){
+            chatInfoObj[timestamp]["People Talking"]++;
         }
-        chatInfoObj[timestamp][groupChat[i].sender_name+" numberOfMessages"]++;
-        chatInfoObj[timestamp][groupChat[i].sender_name+" numberOfCharacters"]+=groupChat[i].content.replace(/\W/g, '').length;
+        chatInfoObj[timestamp][groupChat[i].sender_name+" Number Of Messages"]++;
+        chatInfoObj[timestamp]["Total Number Of Messages"]++;
+        chatInfoObj[timestamp][groupChat[i].sender_name+" Number Of Characters"]+=groupChat[i].content.replace(/\W/g, '').length;
+        chatInfoObj[timestamp]["Total Number Of Characters"]+=groupChat[i].content.replace(/\W/g, '').length;
     }
 }
 
