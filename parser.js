@@ -22,19 +22,21 @@ actors = new Set();
 for (i = gcLength-1; i >= 0; i--){
     actors.add(groupChat[i].sender_name);
 }
-
+messageRally = [];
 textDump = {};
 usersBlankObject = {};
+usersMessageFreqBlankObject = {};
 for (const key of actors){
     textDump[key] = "";
-    usersBlankObject[key+" Number Of Messages"] = 0;
+    usersMessageFreqBlankObject[key+" Number Of Messages"] = 0;
+    usersBlankObject[key] = 0;
 }
-usersBlankObject["Total Number Of Messages"] = 0;
+usersMessageFreqBlankObject["Total Number Of Messages"] = 0;
 textDump["total"] = "";
 for (const key of actors){
-    usersBlankObject[key+" Number Of Characters"] = 0;
+    usersMessageFreqBlankObject[key+" Number Of Characters"] = 0;
 }
-usersBlankObject["Total Number Of Characters"] = 0;
+usersMessageFreqBlankObject["Total Number Of Characters"] = 0;
 
 
 //Set up hour long blocks 
@@ -44,7 +46,7 @@ counter = 0;
 indexOfChatInfoObj = {};
 while (timestamp <= roundToHour(new Date(groupChat[0].timestamp_ms))) {
     chatInfoObj[timestamp] = {...{'time':(timestamp.getMonth()+1)+"/"+timestamp.getDate()+"/"+timestamp.getFullYear(), 'hour':timestamp.getHours()+":00"}, 
-                                ...usersBlankObject,
+                                ...usersMessageFreqBlankObject,
                                 ...{"People Talking":0, "People In Chat":0, "Additions": "", "Removals": "", "People Added": "", "People Removed": "" }};  
     indexOfChatInfoObj[timestamp] = counter;
     counter++; 
@@ -85,6 +87,9 @@ for (i = 0; i < gcLength; i++){
 for (i = gcLength-1; i >= 0; i--){
     console.log((50+(gcLength-i+1)*50/gcLength).toFixed(2)+ "%")
 
+    messageRally.push({...usersBlankObject});
+    messageRally[messageRally.length-1][groupChat[i].sender_name] = 1;
+
     timestamp = roundToHour(new Date(groupChat[i].timestamp_ms));
     if(groupChat[i].content != undefined){
         textDump[groupChat[i].sender_name] += groupChat[i].content + "  ";
@@ -120,3 +125,12 @@ fs.writeFile("info.csv", arrayToCSV(Object.values(chatInfoObj)), function(err) {
 
     console.log("The analysis file was saved!");
 }); 
+
+fs.writeFile("rally.csv", arrayToCSV(messageRally), function(err) {
+    if(err) {
+        return console.log(err);
+    }
+
+    console.log("The rally file was saved!");
+}); 
+
