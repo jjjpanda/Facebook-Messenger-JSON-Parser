@@ -90,7 +90,8 @@ for (i = gcLength-1; i >= 0; i--){
     console.log((50+(gcLength-i+1)*50/gcLength).toFixed(2)+ "%")
 
     messageRally.push({...usersBlankObject});
-    messageRally[messageRally.length-1][groupChat[i].sender_name]++;
+    if(i < gcLength-1 && messageRally[messageRally.length-2][groupChat[i].sender_name] == messageRally[messageRally.length-1][groupChat[i].sender_name])
+        messageRally[messageRally.length-1][groupChat[i].sender_name]++;
 
     timestamp = roundToHour(new Date(groupChat[i].timestamp_ms));
     if(groupChat[i].content != undefined){
