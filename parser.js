@@ -26,10 +26,12 @@ messageRally = [];
 textDump = {};
 usersBlankObject = {};
 usersMessageFreqBlankObject = {};
+counter = 0;
 for (const key of actors){
     textDump[key] = "";
     usersMessageFreqBlankObject[key+" Number Of Messages"] = 0;
-    usersBlankObject[key] = 0;
+    usersBlankObject[key] = counter;
+    counter++;
 }
 usersMessageFreqBlankObject["Total Number Of Messages"] = 0;
 textDump["total"] = "";
@@ -88,7 +90,7 @@ for (i = gcLength-1; i >= 0; i--){
     console.log((50+(gcLength-i+1)*50/gcLength).toFixed(2)+ "%")
 
     messageRally.push({...usersBlankObject});
-    messageRally[messageRally.length-1][groupChat[i].sender_name] = 1;
+    messageRally[messageRally.length-1][groupChat[i].sender_name]++;
 
     timestamp = roundToHour(new Date(groupChat[i].timestamp_ms));
     if(groupChat[i].content != undefined){
