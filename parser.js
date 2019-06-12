@@ -95,8 +95,9 @@ for (i = gcLength-1; i >= 0; i--){
 
     timestamp = roundToHour(new Date(groupChat[i].timestamp_ms));
     if(groupChat[i].content != undefined){
-        textDump[groupChat[i].sender_name] += groupChat[i].content + "  ";
-        textDump["total"] += groupChat[i].content + "  ";
+        strToBeAdded = new Buffer(groupChat[i].content.toString('latin1'), 'latin1').toString('utf8')
+        textDump[groupChat[i].sender_name] += strToBeAdded + "  ";
+        textDump["total"] += strToBeAdded + "  ";
         if(chatInfoObj[timestamp][groupChat[i].sender_name+" Number Of Messages"] === 0){
             chatInfoObj[timestamp]["People Talking"]++;
         }
