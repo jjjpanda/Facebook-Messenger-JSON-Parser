@@ -1,4 +1,6 @@
 var fs = require('fs');
+var Sentiment = require('sentiment')
+var sen = new Sentiment()
 
 function arrayToCSV(objArray) {
     const array = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray;
@@ -39,7 +41,10 @@ for (const key of actors){
     usersMessageFreqBlankObject[key+" Number Of Characters"] = 0;
 }
 usersMessageFreqBlankObject["Total Number Of Characters"] = 0;
-
+for (const key of actors){
+    usersMessageFreqBlankObject[key+" Sentiment"] = 0;
+}
+usersMessageFreqBlankObject["Total Sentiment"] = 0;
 
 //Set up hour long blocks 
 chatInfoObj = {};
@@ -105,6 +110,8 @@ for (i = gcLength-1; i >= 0; i--){
         chatInfoObj[timestamp]["Total Number Of Messages"]++;
         chatInfoObj[timestamp][groupChat[i].sender_name+" Number Of Characters"]+=groupChat[i].content.replace(/\W/g, '').length;
         chatInfoObj[timestamp]["Total Number Of Characters"]+=groupChat[i].content.replace(/\W/g, '').length;
+        chatInfoObj[timestamp][groupChat[i].sender_name+" Sentiment"]+=sen.analyze(groupChat[i].content).comparative;
+        chatInfoObj[timestamp]["Total Sentiment"]+=sen.analyze(groupChat[i].content).comparative;
     }
 }
 
