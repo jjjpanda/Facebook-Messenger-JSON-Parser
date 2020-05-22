@@ -1,0 +1,22 @@
+{
+  "name": "facebook-messenger-json-parser",
+  "version": "1.0.0",
+  "description": "Download your messages from Facebook as JSONs and run this parser in the directory with the message.json file.",
+  "main": "parser.js",
+  "scripts": {
+    "start": "node parser.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jjjpanda/Facebook-Messenger-JSON-Parser.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jjjpanda/Facebook-Messenger-JSON-Parser/issues"
+  },
+  "homepage": "https://github.com/jjjpanda/Facebook-Messenger-JSON-Parser#readme",
+  "dependencies": {
+    "sentiment": "^5.0.2"
+  }
+}
