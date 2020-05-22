@@ -2,6 +2,8 @@ var fs = require('fs');
 var Sentiment = require('sentiment')
 var sen = new Sentiment()
 
+console.log(process.argv)
+
 function arrayToCSV(objArray) {
     const array = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray;
     let str = `${Object.keys(array[0]).map(value => `"${value}"`).join(",")}` + '\r\n';
@@ -9,6 +11,26 @@ function arrayToCSV(objArray) {
         str += `${Object.values(next).map(value => `"${value}"`).join(",")}` + '\r\n';
         return str;
        }, str);
+}
+
+function objectOfObjectsToCSV(obj) {
+    let str = ","
+    columns = new Set()
+    for( const columnName of Object.keys(obj[Object.keys(obj)[0]])){
+        str += new Buffer(columnName.toString('latin1'), 'latin1').toString('utf8')+","
+        columns.add(columnName)
+    }
+
+    str+="\r\n"
+    
+    for(const rowName of Object.keys(obj)){
+        str += rowName+","
+        for( const columnName of columns){
+            str+= obj[rowName][columnName]+','
+        }
+        str+="\r\n"
+    }
+    return str
 }
 
 function roundToHour(timestamp){
@@ -21,30 +43,57 @@ groupChat = groupChat.messages;
 gcLength = groupChat.length;
 
 actors = new Set();
+reactions = new Set()
 for (i = gcLength-1; i >= 0; i--){
     actors.add(groupChat[i].sender_name);
+    if(groupChat[i].reactions != undefined){
+        for(const {reaction} of groupChat[i].reactions ){
+            reactions.add(reaction)
+        }
+    }
 }
+console.log(reactions)
+
 messageRally = [];
 textDump = {};
 usersBlankObject = {};
 usersMessageFreqBlankObject = {};
+reactionMatrix = {}
+
 counter = 0;
 for (const key of actors){
     textDump[key] = "";
     usersMessageFreqBlankObject[key+" Number Of Messages"] = 0;
     usersBlankObject[key] = counter;
     counter++;
+
+    reactionMatrix[key] = {}
+    for( const reaction of reactions){
+        for( const key2 of actors ){
+            reactionMatrix[key][key2+" "+reaction] = 0
+        }
+    }
 }
+
 usersMessageFreqBlankObject["Total Number Of Messages"] = 0;
+
 textDump["total"] = "";
+
 for (const key of actors){
     usersMessageFreqBlankObject[key+" Number Of Characters"] = 0;
 }
 usersMessageFreqBlankObject["Total Number Of Characters"] = 0;
+
 for (const key of actors){
     usersMessageFreqBlankObject[key+" Sentiment"] = 0;
 }
 usersMessageFreqBlankObject["Total Sentiment"] = 0;
+
+for (const key of actors){
+    usersMessageFreqBlankObject[key+" Reactions"] = 0;
+}
+usersMessageFreqBlankObject["Total Number Of Reactions"] = 0;
+
 
 //Set up hour long blocks 
 chatInfoObj = {};
@@ -64,7 +113,7 @@ while (timestamp <= roundToHour(new Date(groupChat[0].timestamp_ms))) {
 timestamp = roundToHour(new Date(groupChat[0].timestamp_ms));
 chatInfoObj[timestamp]['People In Chat'] = currentUsers;
 for (i = 0; i < gcLength; i++){
-    console.log(((i/ gcLength)*50).toFixed(2)+ "%")
+    //console.log(((i/ gcLength)*50).toFixed(2)+ "%")
 
     timestamp = roundToHour(new Date(groupChat[i].timestamp_ms));
     if(i != 0 && (timestamp != roundToHour(new Date(groupChat[i-1].timestamp_ms)))){
@@ -92,7 +141,7 @@ for (i = 0; i < gcLength; i++){
 
 //Going forwards in time
 for (i = gcLength-1; i >= 0; i--){
-    console.log((50+(gcLength-i+1)*50/gcLength).toFixed(2)+ "%")
+    //console.log((50+(gcLength-i+1)*50/gcLength).toFixed(2)+ "%")
 
     messageRally.push({...usersBlankObject});
     if(i < gcLength-1 && messageRally[messageRally.length-2][groupChat[i].sender_name] == messageRally[messageRally.length-1][groupChat[i].sender_name])
@@ -110,6 +159,16 @@ for (i = gcLength-1; i >= 0; i--){
         chatInfoObj[timestamp]["Total Number Of Messages"]++;
         chatInfoObj[timestamp][groupChat[i].sender_name+" Number Of Characters"]+=groupChat[i].content.replace(/\W/g, '').length;
         chatInfoObj[timestamp]["Total Number Of Characters"]+=groupChat[i].content.replace(/\W/g, '').length;
+        
+        if(groupChat[i].reactions != undefined){
+            for( const {reaction, actor} of groupChat[i].reactions){
+                chatInfoObj[timestamp][actor+" Reactions"]++
+                chatInfoObj[timestamp]["Total Number Of Reactions"]++
+
+                reactionMatrix[groupChat[i].sender_name][actor+" "+reaction]++
+            }
+        }
+        
         chatInfoObj[timestamp][groupChat[i].sender_name+" Sentiment"]+=sen.analyze(groupChat[i].content).comparative;
         chatInfoObj[timestamp]["Total Sentiment"]+=sen.analyze(groupChat[i].content).comparative;
     }
@@ -128,6 +187,14 @@ for(const key of Object.keys(textDump)){
         console.log("The " +key+ " text file was saved!");
     }); 
 }
+
+fs.writeFile('reactions.csv', objectOfObjectsToCSV(reactionMatrix), function(err) {
+    if(err) {
+        return console.log(err);
+    }
+
+    console.log("The reactions file was saved!");
+})
 
 fs.writeFile("info.csv", arrayToCSV(Object.values(chatInfoObj)), function(err) {
     if(err) {
