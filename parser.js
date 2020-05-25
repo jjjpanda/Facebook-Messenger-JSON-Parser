@@ -13,7 +13,7 @@ let groupChat = {
 }
 for(const file of files){
     if(path.extname(file) == ".json" && file != 'totalChat.json'){
-        //console.log(path.join(dirPath, file))
+        console.log(path.join(dirPath, file))
         let parsedJSON = JSON.parse(fs.readFileSync(path.join(dirPath, file), 'utf8'))
         if(parsedJSON.participants != undefined && parsedJSON.messages != undefined && parsedJSON.title != undefined){
             groupChat.participants = [...groupChat.participants, ...parsedJSON.participants]
@@ -23,8 +23,8 @@ for(const file of files){
 }
 
 groupChat.participants = removeDuplicates(groupChat.participants, "name")
-groupChat.messages.sort((a, b) => {
-    return a.timestamp_ms > b.timestamp_ms;
+groupChat.messages = groupChat.messages.sort((a, b) => {
+    return parseInt(b.timestamp_ms) - parseInt(a.timestamp_ms);
 })
 
 fs.writeFileSync(path.join(dirPath,"totalChat.json"), JSON.stringify(groupChat, null, 1), 'utf8')
