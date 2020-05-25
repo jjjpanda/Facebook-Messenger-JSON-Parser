@@ -1,8 +1,34 @@
 var fs = require('fs');
-var Sentiment = require('sentiment')
+var path = require('path');
+var Sentiment = require('sentiment');
 var sen = new Sentiment()
 
-console.log(process.argv)
+const dirPath = path.resolve(__dirname, process.argv[2] || "./")
+const files = fs.readdirSync(dirPath)
+
+let groupChat = {
+    participants: [],
+    messages: [],
+    title: "Group Chat"
+}
+for(const file of files){
+    if(path.extname(file) == ".json" && file != 'totalChat.json'){
+        //console.log(path.join(dirPath, file))
+        let parsedJSON = JSON.parse(fs.readFileSync(path.join(dirPath, file), 'utf8'))
+        if(parsedJSON.participants != undefined && parsedJSON.messages != undefined && parsedJSON.title != undefined){
+            groupChat.participants = [...groupChat.participants, ...parsedJSON.participants]
+            groupChat.messages = [...groupChat.messages, ...parsedJSON.messages]
+        }
+    }
+}
+
+groupChat.messages.sort((a, b) => {
+    return a.timestamp_ms > b.timestamp_ms;
+})
+
+fs.writeFileSync(path.join(dirPath,"totalChat.json"), JSON.stringify(groupChat, null, 1), 'utf8')
+
+//var groupChat = JSON.parse(fs.readFileSync('message.json','utf8'));
 
 function arrayToCSV(objArray) {
     const array = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray;
@@ -37,7 +63,6 @@ function roundToHour(timestamp){
     return new Date(timestamp.getYear()+1900, timestamp.getMonth(), timestamp.getDate(), timestamp.getHours(), 0, 0, 0);    
 }
 
-var groupChat = JSON.parse(fs.readFileSync('message.json','utf8'));
 currentUsers = groupChat.participants.length;
 groupChat = groupChat.messages;
 gcLength = groupChat.length;
@@ -177,10 +202,10 @@ for (i = gcLength-1; i >= 0; i--){
 //create text files containing all message contents per user
 dir = "./cloud"
 if (!fs.existsSync(dir)){
-    fs.mkdirSync(dir);
+    fs.mkdirSync(path.join(dirPath, dir));
 }
 for(const key of Object.keys(textDump)){
-    fs.writeFile("./cloud/"+key+".txt", textDump[key], function(err) {
+    fs.writeFile(path.join(dirPath,"./cloud/"+key+".txt"), textDump[key], function(err) {
         if(err) {
             return console.log(err);
         }
@@ -188,7 +213,7 @@ for(const key of Object.keys(textDump)){
     }); 
 }
 
-fs.writeFile('reactions.csv', objectOfObjectsToCSV(reactionMatrix), function(err) {
+fs.writeFile(path.join(dirPath,'reactions.csv'), objectOfObjectsToCSV(reactionMatrix), function(err) {
     if(err) {
         return console.log(err);
     }
@@ -196,7 +221,7 @@ fs.writeFile('reactions.csv', objectOfObjectsToCSV(reactionMatrix), function(err
     console.log("The reactions file was saved!");
 })
 
-fs.writeFile("info.csv", arrayToCSV(Object.values(chatInfoObj)), function(err) {
+fs.writeFile(path.join(dirPath,"info.csv"), arrayToCSV(Object.values(chatInfoObj)), function(err) {
     if(err) {
         return console.log(err);
     }
@@ -204,11 +229,10 @@ fs.writeFile("info.csv", arrayToCSV(Object.values(chatInfoObj)), function(err) {
     console.log("The analysis file was saved!");
 }); 
 
-fs.writeFile("rally.csv", arrayToCSV(messageRally), function(err) {
+fs.writeFile(path.join(dirPath,"rally.csv"), arrayToCSV(messageRally), function(err) {
     if(err) {
         return console.log(err);
     }
 
     console.log("The rally file was saved!");
 }); 
-
