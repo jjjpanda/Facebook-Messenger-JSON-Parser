@@ -22,6 +22,7 @@ for(const file of files){
     }
 }
 
+groupChat.participants = removeDuplicates(groupChat.participants, "name")
 groupChat.messages.sort((a, b) => {
     return a.timestamp_ms > b.timestamp_ms;
 })
@@ -29,6 +30,20 @@ groupChat.messages.sort((a, b) => {
 fs.writeFileSync(path.join(dirPath,"totalChat.json"), JSON.stringify(groupChat, null, 1), 'utf8')
 
 //var groupChat = JSON.parse(fs.readFileSync('message.json','utf8'));
+
+function removeDuplicates(originalArray, prop) {
+    var newArray = [];
+    var lookupObject  = {};
+
+    for(var i in originalArray) {
+       lookupObject[originalArray[i][prop]] = originalArray[i];
+    }
+
+    for(i in lookupObject) {
+        newArray.push(lookupObject[i]);
+    }
+     return newArray;
+}
 
 function arrayToCSV(objArray) {
     const array = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray;
