@@ -216,7 +216,7 @@ for (i = gcLength-1; i >= 0; i--){
 
 //create text files containing all message contents per user
 dir = "./cloud"
-if (!fs.existsSync(dir)){
+if (!fs.existsSync(path.join(dirPath, dir))){
     fs.mkdirSync(path.join(dirPath, dir));
 }
 for(const key of Object.keys(textDump)){
