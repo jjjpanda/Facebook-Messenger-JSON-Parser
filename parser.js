@@ -153,7 +153,7 @@ while (timestamp <= roundToHour(new Date(groupChat[0].timestamp_ms))) {
 timestamp = roundToHour(new Date(groupChat[0].timestamp_ms));
 chatInfoObj[timestamp]['People In Chat'] = currentUsers;
 for (i = 0; i < gcLength; i++){
-    //console.log(((i/ gcLength)*50).toFixed(2)+ "%")
+    console.log(((i/ gcLength)*50).toFixed(2)+ "%")
 
     timestamp = roundToHour(new Date(groupChat[i].timestamp_ms));
     if(i != 0 && (timestamp != roundToHour(new Date(groupChat[i-1].timestamp_ms)))){
@@ -181,24 +181,50 @@ for (i = 0; i < gcLength; i++){
 
 //Going forwards in time
 for (i = gcLength-1; i >= 0; i--){
-    //console.log((50+(gcLength-i+1)*50/gcLength).toFixed(2)+ "%")
+    console.log((50+(gcLength-i+1)*50/gcLength).toFixed(2)+ "%")
 
     messageRally.push({...usersBlankObject});
     if(i < gcLength-1 && messageRally[messageRally.length-2][groupChat[i].sender_name] == messageRally[messageRally.length-1][groupChat[i].sender_name])
         messageRally[messageRally.length-1][groupChat[i].sender_name]++;
 
     timestamp = roundToHour(new Date(groupChat[i].timestamp_ms));
-    if(groupChat[i].content != undefined){
-        strToBeAdded = new Buffer(groupChat[i].content.toString('latin1'), 'latin1').toString('utf8')
-        textDump[groupChat[i].sender_name] += strToBeAdded + "  ";
-        textDump["total"] += strToBeAdded + "  ";
+    if(groupChat[i] != undefined){
         if(chatInfoObj[timestamp][groupChat[i].sender_name+" Number Of Messages"] === 0){
             chatInfoObj[timestamp]["People Talking"]++;
         }
         chatInfoObj[timestamp][groupChat[i].sender_name+" Number Of Messages"]++;
         chatInfoObj[timestamp]["Total Number Of Messages"]++;
-        chatInfoObj[timestamp][groupChat[i].sender_name+" Number Of Characters"]+=groupChat[i].content.replace(/\W/g, '').length;
-        chatInfoObj[timestamp]["Total Number Of Characters"]+=groupChat[i].content.replace(/\W/g, '').length;
+        
+        let messageValue = false
+
+        if(groupChat[i].content != undefined){
+            strToBeAdded = new Buffer(groupChat[i].content.toString('latin1'), 'latin1').toString('utf8')
+            textDump[groupChat[i].sender_name] += strToBeAdded + "  ";
+            textDump["total"] += strToBeAdded + "  ";
+
+            chatInfoObj[timestamp][groupChat[i].sender_name+" Number Of Characters"]+=groupChat[i].content.replace(/\W/g, '').length;
+            chatInfoObj[timestamp]["Total Number Of Characters"]+=groupChat[i].content.replace(/\W/g, '').length;
+
+            chatInfoObj[timestamp][groupChat[i].sender_name+" Sentiment"]+=sen.analyze(groupChat[i].content).comparative;
+            chatInfoObj[timestamp]["Total Sentiment"]+=sen.analyze(groupChat[i].content).comparative;
+            
+            messageValue = true
+        }
+        
+        if(groupChat[i].photos != undefined){
+
+            messageValue = true
+        }
+
+        if(groupChat[i].audio_files != undefined){
+
+            messageValue = true
+        }
+
+        if(groupChat[i].files != undefined){
+
+            messageValue = true
+        }
         
         if(groupChat[i].reactions != undefined){
             for( const {reaction, actor} of groupChat[i].reactions){
@@ -208,9 +234,12 @@ for (i = gcLength-1; i >= 0; i--){
                 reactionMatrix[groupChat[i].sender_name][actor+" "+reaction]++
             }
         }
-        
-        chatInfoObj[timestamp][groupChat[i].sender_name+" Sentiment"]+=sen.analyze(groupChat[i].content).comparative;
-        chatInfoObj[timestamp]["Total Sentiment"]+=sen.analyze(groupChat[i].content).comparative;
+
+        if(!messageValue){
+            //Removed message
+
+        }
+    
     }
 }
 
