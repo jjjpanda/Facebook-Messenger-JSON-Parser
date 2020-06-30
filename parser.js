@@ -103,7 +103,7 @@ reactionMatrix = {}
 counter = 0;
 for (const key of actors){
     textDump[key] = "";
-    usersMessageFreqBlankObject[key+" Number Of Messages"] = 0;
+    usersMessageFreqBlankObject[key+" Messages"] = 0;
     usersBlankObject[key] = counter;
     counter++;
 
@@ -115,14 +115,19 @@ for (const key of actors){
     }
 }
 
-usersMessageFreqBlankObject["Total Number Of Messages"] = 0;
+usersMessageFreqBlankObject["Total Messages"] = 0;
 
 textDump["total"] = "";
 
 for (const key of actors){
-    usersMessageFreqBlankObject[key+" Number Of Characters"] = 0;
+    usersMessageFreqBlankObject[key+" Characters"] = 0;
 }
-usersMessageFreqBlankObject["Total Number Of Characters"] = 0;
+usersMessageFreqBlankObject["Total Characters"] = 0;
+
+for (const key of actors){
+    usersMessageFreqBlankObject[key+" Reactions"] = 0;
+}
+usersMessageFreqBlankObject["Total Reactions"] = 0;
 
 for (const key of actors){
     usersMessageFreqBlankObject[key+" Sentiment"] = 0;
@@ -130,10 +135,24 @@ for (const key of actors){
 usersMessageFreqBlankObject["Total Sentiment"] = 0;
 
 for (const key of actors){
-    usersMessageFreqBlankObject[key+" Reactions"] = 0;
+    usersMessageFreqBlankObject[key+" Photos"] = 0;
 }
-usersMessageFreqBlankObject["Total Number Of Reactions"] = 0;
+usersMessageFreqBlankObject["Total Photos"] = 0;
 
+for (const key of actors){
+    usersMessageFreqBlankObject[key+" Audios"] = 0;
+}
+usersMessageFreqBlankObject["Total Audios"] = 0;
+
+for (const key of actors){
+    usersMessageFreqBlankObject[key+" Files"] = 0;
+}
+usersMessageFreqBlankObject["Total Files"] = 0;
+
+for (const key of actors){
+    usersMessageFreqBlankObject[key+" Removed Messages"] = 0;
+}
+usersMessageFreqBlankObject["Total Removed Messages"] = 0;
 
 //Set up hour long blocks 
 chatInfoObj = {};
@@ -189,11 +208,11 @@ for (i = gcLength-1; i >= 0; i--){
 
     timestamp = roundToHour(new Date(groupChat[i].timestamp_ms));
     if(groupChat[i] != undefined){
-        if(chatInfoObj[timestamp][groupChat[i].sender_name+" Number Of Messages"] === 0){
+        if(chatInfoObj[timestamp][groupChat[i].sender_name+" Messages"] === 0){
             chatInfoObj[timestamp]["People Talking"]++;
         }
-        chatInfoObj[timestamp][groupChat[i].sender_name+" Number Of Messages"]++;
-        chatInfoObj[timestamp]["Total Number Of Messages"]++;
+        chatInfoObj[timestamp][groupChat[i].sender_name+" Messages"]++;
+        chatInfoObj[timestamp]["Total Messages"]++;
         
         let messageValue = false
 
@@ -202,8 +221,8 @@ for (i = gcLength-1; i >= 0; i--){
             textDump[groupChat[i].sender_name] += strToBeAdded + "  ";
             textDump["total"] += strToBeAdded + "  ";
 
-            chatInfoObj[timestamp][groupChat[i].sender_name+" Number Of Characters"]+=groupChat[i].content.replace(/\W/g, '').length;
-            chatInfoObj[timestamp]["Total Number Of Characters"]+=groupChat[i].content.replace(/\W/g, '').length;
+            chatInfoObj[timestamp][groupChat[i].sender_name+" Characters"]+=groupChat[i].content.replace(/\W/g, '').length;
+            chatInfoObj[timestamp]["Total Characters"]+=groupChat[i].content.replace(/\W/g, '').length;
 
             chatInfoObj[timestamp][groupChat[i].sender_name+" Sentiment"]+=sen.analyze(groupChat[i].content).comparative;
             chatInfoObj[timestamp]["Total Sentiment"]+=sen.analyze(groupChat[i].content).comparative;
@@ -212,24 +231,27 @@ for (i = gcLength-1; i >= 0; i--){
         }
         
         if(groupChat[i].photos != undefined){
-
+            chatInfoObj[timestamp][groupChat[i].sender_name+" Photos"]+=groupChat[i].photos.length;
+            chatInfoObj[timestamp]["Total Photos"]+=groupChat[i].photos.length;
             messageValue = true
         }
 
         if(groupChat[i].audio_files != undefined){
-
+            chatInfoObj[timestamp][groupChat[i].sender_name+" Audios"]+=groupChat[i].audio_files.length;
+            chatInfoObj[timestamp]["Total Audios"]+=groupChat[i].audio_files.length;
             messageValue = true
         }
 
         if(groupChat[i].files != undefined){
-
+            chatInfoObj[timestamp][groupChat[i].sender_name+" Files"]+=groupChat[i].files.length;
+            chatInfoObj[timestamp]["Total Files"]+=groupChat[i].files.length;
             messageValue = true
         }
         
         if(groupChat[i].reactions != undefined){
             for( const {reaction, actor} of groupChat[i].reactions){
                 chatInfoObj[timestamp][actor+" Reactions"]++
-                chatInfoObj[timestamp]["Total Number Of Reactions"]++
+                chatInfoObj[timestamp]["Total Reactions"]++
 
                 reactionMatrix[groupChat[i].sender_name][actor+" "+reaction]++
             }
@@ -237,7 +259,8 @@ for (i = gcLength-1; i >= 0; i--){
 
         if(!messageValue){
             //Removed message
-
+            chatInfoObj[timestamp][groupChat[i].sender_name+" Removed Messages"]++;
+            chatInfoObj[timestamp]["Total Removed Messages"]++;
         }
     
     }
