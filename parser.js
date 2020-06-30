@@ -58,7 +58,7 @@ function objectOfObjectsToCSV(obj) {
     let str = ","
     columns = new Set()
     for( const columnName of Object.keys(obj[Object.keys(obj)[0]])){
-        str += new Buffer(columnName.toString('latin1'), 'latin1').toString('utf8')+","
+        str += columnName+","
         columns.add(columnName)
     }
 
@@ -88,7 +88,7 @@ for (i = gcLength-1; i >= 0; i--){
     actors.add(groupChat[i].sender_name);
     if(groupChat[i].reactions != undefined){
         for(const {reaction} of groupChat[i].reactions ){
-            reactions.add(reaction)
+            reactions.add(new Buffer(reaction.toString('latin1'), 'latin1').toString('utf8'))
         }
     }
 }
