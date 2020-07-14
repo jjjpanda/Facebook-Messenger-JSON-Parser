@@ -100,10 +100,21 @@ usersBlankObject = {};
 usersMessageFreqBlankObject = {};
 reactionMatrix = {}
 
+const categories = [
+    "Messages",
+    "Characters",
+    "Sentiment",
+    "Reactions",
+    "Photos",
+    "Audios",
+    "Files",
+    "Removed Messages"
+]
+
 counter = 0;
 for (const key of actors){
     textDump[key] = "";
-    usersMessageFreqBlankObject[key+" Messages"] = 0;
+
     usersBlankObject[key] = counter;
     counter++;
 
@@ -115,44 +126,17 @@ for (const key of actors){
     }
 }
 
-usersMessageFreqBlankObject["Total Messages"] = 0;
+for(const category of categories){
+    for (const key of actors){
+        usersMessageFreqBlankObject[`${key} ${category}`] = 0;
+    }
+}
 
 textDump["total"] = "";
 
-for (const key of actors){
-    usersMessageFreqBlankObject[key+" Characters"] = 0;
+for(const category of categories){
+    usersMessageFreqBlankObject[`Total ${category}`] = 0;
 }
-usersMessageFreqBlankObject["Total Characters"] = 0;
-
-for (const key of actors){
-    usersMessageFreqBlankObject[key+" Reactions"] = 0;
-}
-usersMessageFreqBlankObject["Total Reactions"] = 0;
-
-for (const key of actors){
-    usersMessageFreqBlankObject[key+" Sentiment"] = 0;
-}
-usersMessageFreqBlankObject["Total Sentiment"] = 0;
-
-for (const key of actors){
-    usersMessageFreqBlankObject[key+" Photos"] = 0;
-}
-usersMessageFreqBlankObject["Total Photos"] = 0;
-
-for (const key of actors){
-    usersMessageFreqBlankObject[key+" Audios"] = 0;
-}
-usersMessageFreqBlankObject["Total Audios"] = 0;
-
-for (const key of actors){
-    usersMessageFreqBlankObject[key+" Files"] = 0;
-}
-usersMessageFreqBlankObject["Total Files"] = 0;
-
-for (const key of actors){
-    usersMessageFreqBlankObject[key+" Removed Messages"] = 0;
-}
-usersMessageFreqBlankObject["Total Removed Messages"] = 0;
 
 //Set up hour long blocks 
 chatInfoObj = {};
@@ -201,10 +185,12 @@ for (i = 0; i < gcLength; i++){
 //Going forwards in time
 for (i = gcLength-1; i >= 0; i--){
     console.log((50+(gcLength-i+1)*50/gcLength).toFixed(2)+ "%")
-
-    messageRally.push({...usersBlankObject});
-    if(i < gcLength-1 && messageRally[messageRally.length-2][groupChat[i].sender_name] == messageRally[messageRally.length-1][groupChat[i].sender_name])
+    
+    messageRally.push({...usersBlankObject, "time til next": ''});
+    if(i < gcLength-1){    
         messageRally[messageRally.length-1][groupChat[i].sender_name]++;
+        messageRally[messageRally.length-1]["time til next"] = (groupChat[i-1] != undefined ? (groupChat[i].sender_name != groupChat[i-1].sender_name ? groupChat[i-1].timestamp_ms - groupChat[i].timestamp_ms : "") : "")
+    }
 
     timestamp = roundToHour(new Date(groupChat[i].timestamp_ms));
     if(groupChat[i] != undefined){
