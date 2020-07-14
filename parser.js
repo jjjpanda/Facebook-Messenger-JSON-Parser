@@ -1,7 +1,8 @@
-var fs = require('fs');
-var path = require('path');
-var Sentiment = require('sentiment');
-var sen = new Sentiment()
+const fs = require('fs');
+const path = require('path');
+const Sentiment = require('sentiment');
+const cliProgress = require('cli-progress');
+const sen = new Sentiment()
 
 const dirPath = path.resolve(__dirname, process.argv[2] || "./")
 const files = fs.readdirSync(dirPath)
@@ -152,11 +153,16 @@ while (timestamp <= roundToHour(new Date(groupChat[0].timestamp_ms))) {
     timestamp.setHours(timestamp.getHours()+1);
 }
 
+const bar = new cliProgress.SingleBar({
+    format: 'progress [{bar}] {percentage}% | Time Elapsed: {duration}s 😎'
+}, cliProgress.Presets.shades_classic)
+bar.start(100, 0)
+
 //Going backwards in time
 timestamp = roundToHour(new Date(groupChat[0].timestamp_ms));
 chatInfoObj[timestamp]['People In Chat'] = currentUsers;
 for (i = 0; i < gcLength; i++){
-    console.log(((i/ gcLength)*50).toFixed(2)+ "%")
+    bar.update(((i/ gcLength)*50))
 
     timestamp = roundToHour(new Date(groupChat[i].timestamp_ms));
     if(i != 0 && (timestamp != roundToHour(new Date(groupChat[i-1].timestamp_ms)))){
@@ -184,7 +190,7 @@ for (i = 0; i < gcLength; i++){
 
 //Going forwards in time
 for (i = gcLength-1; i >= 0; i--){
-    console.log((50+(gcLength-i+1)*50/gcLength).toFixed(2)+ "%")
+    bar.update((50+(gcLength-i+1)*50/gcLength))
     
     messageRally.push({...usersBlankObject, "time til next": ''});
     if(i < gcLength-1){    
@@ -251,6 +257,8 @@ for (i = gcLength-1; i >= 0; i--){
     
     }
 }
+
+bar.stop()
 
 //create text files containing all message contents per user
 dir = "./cloud"
