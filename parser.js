@@ -203,8 +203,12 @@ for (i = gcLength-1; i >= 0; i--){
         if(chatInfoObj[timestamp][groupChat[i].sender_name+" Messages"] === 0){
             chatInfoObj[timestamp]["People Talking"]++;
         }
-        chatInfoObj[timestamp][groupChat[i].sender_name+" Messages"]++;
-        chatInfoObj[timestamp]["Total Messages"]++;
+
+        let numberOfMessages = groupChat[i+1] == undefined || groupChat[i+1].sender_name == groupChat[i].sender_name ? 0 : 1
+        chatInfoObj[timestamp][groupChat[i].sender_name+" Messages"]+=numberOfMessages;
+        chatInfoObj[timestamp]["Total Messages"]+=numberOfMessages;
+
+        //Make number of messages always 1 to remove consideration of people sending consecutive messages.
         
         let messageValue = false
 
