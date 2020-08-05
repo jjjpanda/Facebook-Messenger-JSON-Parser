@@ -93,7 +93,7 @@ for (i = gcLength-1; i >= 0; i--){
         }
     }
 }
-console.log(reactions)
+console.log("Reactions: ", reactions)
 
 messageRally = [];
 textDump = {};
@@ -103,6 +103,7 @@ reactionMatrix = {}
 
 const categories = [
     "Messages",
+    "Sends",
     "Characters",
     "Sentiment",
     "Reactions",
@@ -154,7 +155,7 @@ while (timestamp <= roundToHour(new Date(groupChat[0].timestamp_ms))) {
 }
 
 const bar = new cliProgress.SingleBar({
-    format: 'progress [{bar}] {percentage}% | Time Elapsed: {duration}s 😎'
+    format: 'Processing [{bar}] {percentage}% | Time Elapsed: {duration}s 😎'
 }, cliProgress.Presets.shades_classic)
 bar.start(100, 0)
 
@@ -203,13 +204,16 @@ for (i = gcLength-1; i >= 0; i--){
         if(chatInfoObj[timestamp][groupChat[i].sender_name+" Messages"] === 0){
             chatInfoObj[timestamp]["People Talking"]++;
         }
-
+        
+        //Make number of messages always 1 to remove consideration of people sending consecutive messages.
         let numberOfMessages = groupChat[i+1] == undefined || groupChat[i+1].sender_name == groupChat[i].sender_name ? 0 : 1
+        
         chatInfoObj[timestamp][groupChat[i].sender_name+" Messages"]+=numberOfMessages;
         chatInfoObj[timestamp]["Total Messages"]+=numberOfMessages;
 
-        //Make number of messages always 1 to remove consideration of people sending consecutive messages.
-        
+        chatInfoObj[timestamp][groupChat[i].sender_name+" Sends"]++;
+        chatInfoObj[timestamp]["Total Sends"]++;
+
         let messageValue = false
 
         if(groupChat[i].content != undefined){
