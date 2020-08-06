@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const Sentiment = require('sentiment');
 const cliProgress = require('cli-progress');
+const moment = require('moment')
 const sen = new Sentiment()
 
 const dirPath = path.resolve(__dirname, process.argv[2] || "./")
@@ -26,6 +27,10 @@ for(const file of files){
 groupChat.participants = removeDuplicates(groupChat.participants, "name")
 groupChat.messages = groupChat.messages.sort((a, b) => {
     return parseInt(b.timestamp_ms) - parseInt(a.timestamp_ms);
+})
+
+groupChat.messages.forEach((v, i) => {
+    v.time = moment(v.timestamp_ms).format('YYYY-MM-DD hh:mm:ss A')
 })
 
 fs.writeFileSync(path.join(dirPath,"totalChat.json"), JSON.stringify(groupChat, null, 1), 'utf8')
@@ -201,7 +206,7 @@ for (i = gcLength-1; i >= 0; i--){
 
     timestamp = roundToHour(new Date(groupChat[i].timestamp_ms));
     if(groupChat[i] != undefined){
-        if(chatInfoObj[timestamp][groupChat[i].sender_name+" Messages"] === 0){
+        if(chatInfoObj[timestamp][groupChat[i].sender_name+" Sends"] === 0){
             chatInfoObj[timestamp]["People Talking"]++;
         }
         

@@ -18,6 +18,7 @@
   "homepage": "https://github.com/jjjpanda/Facebook-Messenger-JSON-Parser#readme",
   "dependencies": {
     "cli-progress": "^3.8.2",
+    "moment": "^2.27.0",
     "sentiment": "^5.0.2"
   }
 }
