@@ -6,6 +6,7 @@ const moment = require('moment')
 const sen = new Sentiment()
 
 const dirPath = path.resolve(__dirname, process.argv[2] || "./")
+const minutesInterval = parseInt(process.argv[3]) || 60
 const files = fs.readdirSync(dirPath)
 
 let groupChat = {
@@ -80,8 +81,8 @@ function objectOfObjectsToCSV(obj) {
     return str
 }
 
-function roundToHour(timestamp){
-    return new Date(timestamp.getYear()+1900, timestamp.getMonth(), timestamp.getDate(), timestamp.getHours(), 0, 0, 0);    
+function roundTimestamp(timestamp){
+    return moment(timestamp).second(0).millisecond(0).minute(Math.ceil(moment(timestamp).minute() / minutesInterval) * minutesInterval).toDate()
 }
 
 currentUsers = groupChat.participants.length;
@@ -147,16 +148,17 @@ for(const category of categories){
 
 //Set up hour long blocks 
 chatInfoObj = {};
-timestamp = roundToHour(new Date(groupChat[gcLength-1].timestamp_ms));
+timestamp = roundTimestamp(groupChat[gcLength-1].timestamp_ms);
 counter = 0;
 indexOfChatInfoObj = {};
-while (timestamp <= roundToHour(new Date(groupChat[0].timestamp_ms))) {
+while (timestamp <= roundTimestamp(groupChat[0].timestamp_ms)) {
     chatInfoObj[timestamp] = {...{'time':(timestamp.getMonth()+1)+"/"+timestamp.getDate()+"/"+timestamp.getFullYear(), 'hour':timestamp.getHours()+":00"}, 
                                 ...usersMessageFreqBlankObject,
                                 ...{"People Talking":0, "People In Chat":0, "Additions": "", "Removals": "", "People Added": "", "People Removed": "" }};  
     indexOfChatInfoObj[timestamp] = counter;
     counter++; 
-    timestamp.setHours(timestamp.getHours()+1);
+    timestamp = moment(timestamp).add(minutesInterval, 'minute').toDate()
+    //console.log(timestamp, roundTimestamp(groupChat[0].timestamp_ms))
 }
 
 const bar = new cliProgress.SingleBar({
@@ -165,16 +167,16 @@ const bar = new cliProgress.SingleBar({
 bar.start(100, 0)
 
 //Going backwards in time
-timestamp = roundToHour(new Date(groupChat[0].timestamp_ms));
+timestamp = roundTimestamp((groupChat[0].timestamp_ms));
 chatInfoObj[timestamp]['People In Chat'] = currentUsers;
 for (i = 0; i < gcLength; i++){
     bar.update(((i/ gcLength)*50))
 
-    timestamp = roundToHour(new Date(groupChat[i].timestamp_ms));
-    if(i != 0 && (timestamp != roundToHour(new Date(groupChat[i-1].timestamp_ms)))){
-        for(j = 0; j < (roundToHour(new Date(groupChat[i-1].timestamp_ms))-roundToHour(new Date(groupChat[i].timestamp_ms)))/36e5; j++){
-            timestamp = Object.keys(chatInfoObj)[indexOfChatInfoObj[roundToHour(new Date(groupChat[i].timestamp_ms)).toString()]+j]
-            chatInfoObj[timestamp]['People In Chat'] = chatInfoObj[roundToHour(new Date(groupChat[i-1].timestamp_ms))]['People In Chat'];
+    timestamp = roundTimestamp((groupChat[i].timestamp_ms));
+    if(i != 0 && (timestamp != roundTimestamp((groupChat[i-1].timestamp_ms)))){
+        for(j = 0; j < (roundTimestamp((groupChat[i-1].timestamp_ms))-roundTimestamp((groupChat[i].timestamp_ms)))/36e5; j++){
+            timestamp = Object.keys(chatInfoObj)[indexOfChatInfoObj[roundTimestamp((groupChat[i].timestamp_ms)).toString()]+j]
+            chatInfoObj[timestamp]['People In Chat'] = chatInfoObj[roundTimestamp((groupChat[i-1].timestamp_ms))]['People In Chat'];
         }
     }
     
@@ -204,7 +206,7 @@ for (i = gcLength-1; i >= 0; i--){
         messageRally[messageRally.length-1]["time til next"] = (groupChat[i-1] != undefined ? (groupChat[i].sender_name != groupChat[i-1].sender_name ? groupChat[i-1].timestamp_ms - groupChat[i].timestamp_ms : "") : "")
     }
 
-    timestamp = roundToHour(new Date(groupChat[i].timestamp_ms));
+    timestamp = roundTimestamp((groupChat[i].timestamp_ms));
     if(groupChat[i] != undefined){
         if(chatInfoObj[timestamp][groupChat[i].sender_name+" Sends"] === 0){
             chatInfoObj[timestamp]["People Talking"]++;
