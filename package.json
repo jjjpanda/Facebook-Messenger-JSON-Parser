@@ -4,7 +4,7 @@
   "description": "Download your messages from Facebook as JSONs and run this parser in the directory with the message.json file.",
   "main": "parser.js",
   "scripts": {
-    "start": "node parser.js"
+    "start": "node parse.js"
   },
   "repository": {
     "type": "git",
