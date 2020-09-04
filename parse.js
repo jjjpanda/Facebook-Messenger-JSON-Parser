@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const cliProgress = require('cli-progress');
 
 const mergeFiles = require("./lib/setup/mergeFiles.js")
 const pullMerge = require('./lib/setup/pullMerge.js')
@@ -10,9 +9,6 @@ const setUpUserID = require('./lib/setup/userID.js');
 const setUpReactionMatrix = require('./lib/setup/reactionMatrix.js');
 const setUpChatInfoObj = require('./lib/setup/chatInfoObj.js');
 const variates = require('./lib/setup/variates.js');
-const { 
-    setUpInterval 
-} = require('./lib/tools/roundTimestamp.js');
 
 const backwardsAnalysis = require('./lib/backwardsAnalysis.js');
 const forwardsAnalysis = require('./lib/forwardsAnalysis.js');
@@ -22,9 +18,10 @@ const createInfoCSV = require('./lib/postAnalysis/createInfoCSV.js');
 const createRallyCSV = require('./lib/postAnalysis/createRallyCSV.js');
 
 const dirPath = path.resolve(__dirname, process.argv[2] || "./")
-const minutesInterval = parseInt(process.argv[3]) || 60
+console.log(`📁 Using ${dirPath} as the directory.\n`)
 
-setUpInterval(minutesInterval)
+const minutesInterval = parseInt(process.argv[3]) || 60
+console.log(`⌚ Using ${minutesInterval} minutes as the time interval.\n`)
 
 const {
     currentUsers, 
@@ -47,19 +44,12 @@ let messageRally = [];
 let {
     chatInfoObj,
     indexOfChatInfoObj
-} = setUpChatInfoObj(groupChat, gcLength, members, categories, minutesInterval)
+} = setUpChatInfoObj(groupChat, gcLength, members, categories)
 
-const bar = new cliProgress.SingleBar({
-    format: 'Processing [{bar}] {percentage}% | Time Elapsed: {duration}s 😎'
-}, cliProgress.Presets.shades_classic)
-bar.start(100, 0)
-
-backwardsAnalysis(groupChat, gcLength, chatInfoObj, bar, currentUsers, indexOfChatInfoObj)
-forwardsAnalysis(groupChat, gcLength, chatInfoObj, bar, usersNumberIdObject, messageRally, textDump, reactionMatrix)
-
-bar.stop()
+backwardsAnalysis(groupChat, gcLength, chatInfoObj, currentUsers, indexOfChatInfoObj)
+forwardsAnalysis(groupChat, gcLength, chatInfoObj, usersNumberIdObject, messageRally, textDump, reactionMatrix)
 
 createTextFiles(textDump, dirPath)
-createReactions(reactionMatrix, dirPath)
 createInfoCSV(chatInfoObj, dirPath)
 createRallyCSV(messageRally, dirPath)
+createReactions(reactionMatrix, dirPath)
