@@ -2,7 +2,7 @@
   "name": "facebook-messenger-json-parser",
   "version": "1.0.0",
   "description": "Download your messages from Facebook as JSONs and run this parser in the directory with the message.json file.",
-  "main": "parser.js",
+  "main": "parse.js",
   "scripts": {
     "start": "node parse.js"
   },
