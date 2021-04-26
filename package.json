@@ -18,6 +18,8 @@
   "homepage": "https://github.com/jjjpanda/Facebook-Messenger-JSON-Parser#readme",
   "dependencies": {
     "cli-progress": "^3.8.2",
+    "ffprobe": "^1.1.2",
+    "ffprobe-static": "^3.0.0",
     "moment": "^2.27.0",
     "sentiment": "^5.0.2"
   }
