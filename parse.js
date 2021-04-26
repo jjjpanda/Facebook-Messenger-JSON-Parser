@@ -47,9 +47,10 @@ let {
 } = setUpChatInfoObj(groupChat, gcLength, members, categories)
 
 backwardsAnalysis(groupChat, gcLength, chatInfoObj, currentUsers, indexOfChatInfoObj)
-forwardsAnalysis(groupChat, gcLength, chatInfoObj, usersNumberIdObject, messageRally, textDump, reactionMatrix)
+forwardsAnalysis(groupChat, gcLength, chatInfoObj, usersNumberIdObject, messageRally, textDump, reactionMatrix, (t, c, m, r) => {
+    createTextFiles(t, dirPath)
+    createInfoCSV(c, dirPath)
+    createRallyCSV(m, dirPath)
+    createReactions(r, dirPath)
+})
 
-createTextFiles(textDump, dirPath)
-createInfoCSV(chatInfoObj, dirPath)
-createRallyCSV(messageRally, dirPath)
-createReactions(reactionMatrix, dirPath)
