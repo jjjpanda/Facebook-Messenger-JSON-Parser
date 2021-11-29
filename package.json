@@ -15,6 +15,7 @@
   },
   "homepage": "https://github.com/jjjpanda/Facebook-Messenger-JSON-Parser#readme",
   "dependencies": {
+    "@tensorflow-models/toxicity": "^1.2.2",
     "cli-progress": "^3.8.2",
     "ffprobe": "^1.1.2",
     "ffprobe-static": "^3.0.0",
